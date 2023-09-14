@@ -1,0 +1,30 @@
+{
+  "name": "notes",
+  "version": "1.0.0",
+  "description": "Notes API app for http://notesapp-v1.dicodingacademy.com/ ",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "start:dev": "nodemon src/index.js",
+    "test": "jest -i",
+    "lint": "eslint ./"
+  },
+  "author": "Hidayat Chandra",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/preset-env": "^7.22.15",
+    "@types/jest": "^29.5.4",
+    "c8": "^8.0.1",
+    "eslint": "^8.49.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-import": "^2.28.1",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1"
+  },
+  "dependencies": {
+    "@hapi/hapi": "^21.3.2",
+    "dotenv": "^16.3.1"
+  }
+}
