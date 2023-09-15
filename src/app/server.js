@@ -9,6 +9,13 @@ const port = process.env.PORT;
 const server = Hapi.server({
   host,
   port,
+  routes: {
+    cors: {
+      origin: [
+        '*',
+      ],
+    },
+  },
 });
 
 server.route([
