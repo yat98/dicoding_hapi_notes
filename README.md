@@ -2,7 +2,7 @@
 
 <p align="center">
 <img src="https://circleci.com/gh/yat98/dicoding_hapi_notes/tree/main.svg?style=shield" />
-<img src="https://codecov.io/gh/yat98/learn_circleci/graph/badge.svg?token=OCMLDB6XKW" />
+<img src="https://codecov.io/gh/yat98/dicoding_hapi_notes/graph/badge.svg?token=OCMLDB6XKW" />
 </p>
 <h2>Description</h2>
 <p>
