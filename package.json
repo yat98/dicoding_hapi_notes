@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/index.js",
     "start:dev": "nodemon src/index.js",
-    "test": "jest -i",
+    "test": "jest",
     "lint": "eslint ./"
   },
   "author": "Hidayat Chandra",
@@ -15,6 +15,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.22.15",
     "@types/jest": "^29.5.4",
+    "babel-jest": "^29.7.0",
     "c8": "^8.0.1",
     "eslint": "^8.49.0",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -25,6 +26,8 @@
   },
   "dependencies": {
     "@hapi/hapi": "^21.3.2",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "joi": "^17.10.1",
+    "nanoid": "^3.3.6"
   }
 }
