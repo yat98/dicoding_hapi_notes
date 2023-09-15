@@ -10,6 +10,16 @@ const notesRoute = [
       validate: addNoteValidation,
     },
   },
+  {
+    method: 'GET',
+    path: '/notes',
+    handler: notesHandler.index,
+  },
+  {
+    method: 'GET',
+    path: '/notes/{id}',
+    handler: notesHandler.show,
+  },
 ];
 
 export default notesRoute;

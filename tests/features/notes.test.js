@@ -1,11 +1,39 @@
 /* eslint-disable max-len */
+import {nanoid} from 'nanoid';
 import server from '../../src/app/server.js';
 import notes from '../../src/models/notes.js';
 
 let request;
+const payload = {
+  title: 'Test',
+  tags: [
+    'test',
+    'lorem',
+    'ipsum',
+  ],
+  body: 'Lorem ipsum sit dolor',
+};
+
+const addNote = () => {
+  const id = nanoid(16);
+  const createdAt = new Date().toISOString();
+  const updatedAt = createdAt;
+  notes.push({
+    id,
+    createdAt,
+    updatedAt,
+    ...payload,
+  });
+};
 
 const findNoteId = (id) => {
   return notes.find((note) => note.id === id);
+};
+
+const removeNotes = () => {
+  while (notes.length > 0) {
+    notes.pop();
+  }
 };
 
 beforeAll(async () => {
@@ -17,16 +45,6 @@ afterAll(async () => {
 });
 
 describe('POST /notes', () => {
-  const payload = {
-    title: 'Test',
-    tags: [
-      'test',
-      'lorem',
-      'ipsum',
-    ],
-    body: 'Lorem ipsum sit dolor',
-  };
-
   it('should success add note', async () => {
     const response = await request.inject({
       method: 'POST',
@@ -110,5 +128,75 @@ describe('POST /notes', () => {
     expect(response.statusCode).toBe(400);
     expect(response.result.status).toBe('fail');
     expect(response.result.message).toBe('"body" is required');
+  });
+});
+
+describe('GET /notes', () => {
+  it('should success get list notes', async () => {
+    removeNotes();
+    addNote();
+    const response = await request.inject({
+      method: 'GET',
+      url: '/notes',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.result.status).toBeDefined();
+    expect(response.result.data).toBeDefined();
+    expect(response.result.data.notes).toBeDefined();
+    expect(response.result.status).toBe('success');
+    expect(response.result.data.notes[0].title).toBe(payload.title);
+    expect(response.result.data.notes[0].tags).toEqual(payload.tags);
+    expect(response.result.data.notes[0].body).toBe(payload.body);
+  });
+
+  it('should success get to empty list', async () => {
+    removeNotes();
+    const response = await request.inject({
+      method: 'GET',
+      url: '/notes',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.result.status).toBeDefined();
+    expect(response.result.data).toBeDefined();
+    expect(response.result.data.notes).toBeDefined();
+    expect(response.result.status).toBe('success');
+    expect(response.result.data.notes).toEqual([]);
+  });
+});
+
+describe('GET /notes/{id}', () => {
+  it('should success get detail note', async () => {
+    removeNotes();
+    addNote();
+    const note = notes[0];
+    const response = await request.inject({
+      method: 'GET',
+      url: `/notes/${note.id}`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.result.status).toBeDefined();
+    expect(response.result.data).toBeDefined();
+    expect(response.result.data.note).toBeDefined();
+    expect(response.result.status).toBe('success');
+    expect(response.result.data.note.title).toBe(payload.title);
+    expect(response.result.data.note.tags).toEqual(payload.tags);
+    expect(response.result.data.note.body).toBe(payload.body);
+  });
+
+  it('should return 404 if note is not exists', async () => {
+    removeNotes();
+    const response = await request.inject({
+      method: 'GET',
+      url: '/notes/invalidid',
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.result.status).toBeDefined();
+    expect(response.result.message).toBeDefined();
+    expect(response.result.status).toBe('fail');
+    expect(response.result.message).toBe('note not found');
   });
 });
