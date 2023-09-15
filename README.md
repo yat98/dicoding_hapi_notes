@@ -1,6 +1,6 @@
-<h1 style="text-align:center">Notes App API</h1>
+<h1 align="center">Notes App API</h1>
 
-<p style="text-align:center;">
+<p align="center">
 <img src="https://circleci.com/gh/yat98/learn_circleci/tree/main.svg?style=shield" />
 <img src="https://codecov.io/gh/yat98/learn_circleci/graph/badge.svg?token=OCMLDB6XKW" />
 </p>
