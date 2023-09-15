@@ -1,7 +1,7 @@
 <h1 align="center">Notes App API</h1>
 
 <p align="center">
-<img src="https://circleci.com/gh/yat98/learn_circleci/tree/main.svg?style=shield" />
+<img src="https://circleci.com/gh/yat98/dicoding_hapi_notes/tree/main.svg?style=shield" />
 <img src="https://codecov.io/gh/yat98/learn_circleci/graph/badge.svg?token=OCMLDB6XKW" />
 </p>
 <h2>Description</h2>
