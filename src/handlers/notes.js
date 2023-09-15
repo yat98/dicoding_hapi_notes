@@ -51,8 +51,35 @@ const add = (req, h) => {
   }).code(201);
 };
 
+const update = (req, h) => {
+  const {id} = req.params;
+  const {title, tags, body} = req.payload;
+  const updatedAt = new Date().toISOString();
+  const noteIndex = notes.findIndex((val) => val.id === id);
+
+  if (noteIndex !== -1) {
+    notes[noteIndex] = {
+      ...notes[noteIndex],
+      title,
+      tags,
+      body,
+      updatedAt,
+    };
+    return h.response({
+      status: 'success',
+      message: 'success update note',
+    }).code(200);
+  }
+
+  return h.response({
+    status: 'fail',
+    message: 'note not found',
+  }).code(404);
+};
+
 export default {
   index,
   add,
   show,
+  update,
 };

@@ -1,5 +1,6 @@
+/* eslint-disable max-len */
 import notesHandler from '../handlers/notes.js';
-import {addNoteValidation} from '../validations/notes-validation.js';
+import {addNoteValidation, updateNoteValidation} from '../validations/notes-validation.js';
 
 const notesRoute = [
   {
@@ -19,6 +20,14 @@ const notesRoute = [
     method: 'GET',
     path: '/notes/{id}',
     handler: notesHandler.show,
+  },
+  {
+    method: 'PUT',
+    path: '/notes/{id}',
+    handler: notesHandler.update,
+    options: {
+      validate: updateNoteValidation,
+    },
   },
 ];
 
