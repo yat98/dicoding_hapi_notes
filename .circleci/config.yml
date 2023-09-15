@@ -1,0 +1,25 @@
+version: 2.1
+orbs:
+  codecov: codecov/codecov@3.2.5
+  node: circleci/node@5.0.2
+jobs:
+  test:
+    executor: node/default
+    steps:
+      - checkout
+      - run: |
+          echo 'Install NPM'
+          sudo npm install -g npm@latest
+          sudo npm install -g codecov
+      - node/install-packages:
+          cache-path: ~/project/node_modules
+          override-ci-command: npm install
+      - run: |
+          echo 'Test Coverage'
+          npm run test
+      - run: npm run test:coverage
+      - run: codecov
+workflows:
+  jobs-workflow:
+    jobs:
+      - test
