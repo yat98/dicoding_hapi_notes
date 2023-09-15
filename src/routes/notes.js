@@ -29,6 +29,11 @@ const notesRoute = [
       validate: updateNoteValidation,
     },
   },
+  {
+    method: 'DELETE',
+    path: '/notes/{id}',
+    handler: notesHandler.destroy,
+  },
 ];
 
 export default notesRoute;
