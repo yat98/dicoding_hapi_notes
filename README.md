@@ -28,7 +28,11 @@ $ npm run start:dev
 <h3>Test</h3>
 
 ```bash
+# Test
 $ npm test
+
+# Test Coverage
+$ npm run test:coverage
 ```
 
 
