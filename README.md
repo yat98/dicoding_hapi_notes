@@ -4,7 +4,6 @@
 <img src="https://circleci.com/gh/yat98/learn_circleci/tree/main.svg?style=shield" />
 <img src="https://codecov.io/gh/yat98/learn_circleci/graph/badge.svg?token=OCMLDB6XKW" />
 </p>
-<br>
 <h2>Description</h2>
 <p>
 This is backend API for  <a href="http://notesapp-v1.dicodingacademy.com/">Notes App</a> using backend Hapi JS, Jest for testing and eslint for linter. It has CRUD feature.
