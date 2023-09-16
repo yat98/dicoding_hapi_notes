@@ -11,8 +11,16 @@ This is backend API for  <a href="http://notesapp-v1.dicodingacademy.com/">Notes
 
 <h3>Instalation</h3>
 
+- Install modules
+
 ```bash
 $ npm install
+```
+
+- Copy .env.example to .env
+
+```bash
+$ cp .env.example .env
 ```
 
 <h3>Running App</h3>
@@ -22,7 +30,13 @@ $ npm start
 
 or
 
+# development
 $ npm run start:dev
+
+or
+
+# production
+$ npm run start:prod
 ```
 
 <h3>Test</h3>
