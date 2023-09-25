@@ -1,18 +1,16 @@
-/* c8 ignore next 2 */
-import 'dotenv/config';
+/* c8 ignore next 3*/
 // import notesRoute from '../routes/notes.js';
+// import NotesService from '../services/inMemory/NotesService.js';
+// import notesModel from '../models/notes.js';
 import Hapi from '@hapi/hapi';
 import notes from './api/notes/index.js';
-import NotesService from '../services/inMemory/NotesService.js';
-import notesModel from '../models/notes.js';
+import NotesService from '../services/postgres/NotesService.js';
 import notesValidator from '../validators/notes/index.js';
-
-const host = process.env.HOST;
-const port = process.env.PORT;
+import app from '../config/app.js';
 
 const server = Hapi.server({
-  host,
-  port,
+  host: app.host,
+  port: app.port,
   routes: {
     cors: {
       origin: [
@@ -28,7 +26,7 @@ const server = Hapi.server({
 // ]);
 
 const registerPlugin = async () => {
-  const notesService = new NotesService(notesModel);
+  const notesService = new NotesService();
   await server.register({
     plugin: notes,
     options: {

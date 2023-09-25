@@ -1,4 +1,4 @@
-export class NotesHandler {
+class NotesHandler {
   constructor(service) {
     this._service = service;
     this.postNoteHandler = this.postNoteHandler.bind(this);
@@ -8,9 +8,9 @@ export class NotesHandler {
     this.destroyNoteByIdHandler = this.destroyNoteByIdHandler.bind(this);
   }
 
-  postNoteHandler(req, h) {
+  async postNoteHandler(req, h) {
     const {title, body, tags} = req.payload;
-    const noteId = this._service.addNote({title, body, tags});
+    const noteId = await this._service.addNote({title, body, tags});
 
     return h.response({
       status: 'success',
@@ -21,8 +21,8 @@ export class NotesHandler {
     }).code(201);
   }
 
-  getNotesHandler(req, h) {
-    const notes = this._service.getNote();
+  async getNotesHandler(req, h) {
+    const notes = await this._service.getNote();
     return h.response({
       status: 'success',
       data: {
@@ -31,10 +31,10 @@ export class NotesHandler {
     });
   }
 
-  getNoteByIdHandler(req, h) {
+  async getNoteByIdHandler(req, h) {
     try {
       const {id} = req.params;
-      const note = this._service.getNoteById(id);
+      const note = await this._service.getNoteById(id);
       return h.response({
         status: 'success',
         data: {
@@ -49,10 +49,10 @@ export class NotesHandler {
     }
   }
 
-  putNoteByIdHandler(req, h) {
+  async putNoteByIdHandler(req, h) {
     try {
       const {id} = req.params;
-      this._service.editNoteById(id, req.payload);
+      await this._service.editNoteById(id, req.payload);
 
       return h.response({
         status: 'success',
@@ -66,10 +66,10 @@ export class NotesHandler {
     }
   }
 
-  destroyNoteByIdHandler(req, h) {
+  async destroyNoteByIdHandler(req, h) {
     try {
       const {id} = req.params;
-      this._service.deleteNoteById(id);
+      await this._service.deleteNoteById(id);
 
       return h.response({
         status: 'success',
@@ -83,3 +83,5 @@ export class NotesHandler {
     }
   }
 }
+
+export default NotesHandler;

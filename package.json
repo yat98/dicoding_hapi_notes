@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "start:prod": "NODE_ENV=production node src/index.js",
     "start:dev": "nodemon src/index.js",
+    "migrate": "node-pg-migrate",
     "test": "jest -i",
     "test:coverage": "jest -i --coverage",
     "lint": "eslint ./"
@@ -30,6 +31,8 @@
     "@hapi/hapi": "^21.3.2",
     "dotenv": "^16.3.1",
     "joi": "^17.10.1",
-    "nanoid": "^3.3.6"
+    "nanoid": "^3.3.6",
+    "node-pg-migrate": "^6.2.2",
+    "pg": "^8.11.3"
   }
 }

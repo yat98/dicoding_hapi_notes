@@ -1,6 +1,6 @@
 /* c8 ignore next 2 */
 import {routes} from './routes.js';
-import {NotesHandler} from './handler.js';
+import NotesHandler from './handler.js';
 
 export default {
   name: 'notes',
