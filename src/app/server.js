@@ -5,6 +5,7 @@ import Hapi from '@hapi/hapi';
 import notes from './api/notes/index.js';
 import NotesService from '../services/inMemory/NotesService.js';
 import notesModel from '../models/notes.js';
+import notesValidator from '../validators/notes/index.js';
 
 const host = process.env.HOST;
 const port = process.env.PORT;
@@ -32,11 +33,12 @@ const registerPlugin = async () => {
     plugin: notes,
     options: {
       service: notesService,
+      validator: notesValidator,
     },
   });
 };
 
-/* c8 ignore next 9 */
+/* c8 ignore next 11 */
 const init = async () => {
   await registerPlugin();
   await server.initialize();

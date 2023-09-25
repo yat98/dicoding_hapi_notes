@@ -9,7 +9,7 @@ export class NotesHandler {
   }
 
   postNoteHandler(req, h) {
-    const {title = 'untitled', body, tags} = req.payload;
+    const {title, body, tags} = req.payload;
     const noteId = this._service.addNote({title, body, tags});
 
     return h.response({

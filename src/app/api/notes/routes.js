@@ -1,11 +1,11 @@
-export const routes = (handler) => [
+export const routes = (handler, validator) => [
   {
     method: 'POST',
     path: '/notes',
     handler: handler.postNoteHandler,
-    // options: {
-    //   validate: validation.addNoteValidation,
-    // },
+    options: {
+      validate: validator.addNoteValidation,
+    },
   },
   {
     method: 'GET',
@@ -21,9 +21,9 @@ export const routes = (handler) => [
     method: 'PUT',
     path: '/notes/{id}',
     handler: handler.putNoteByIdHandler,
-    // options: {
-    //   validate: validation.updateNoteValidation,
-    // },
+    options: {
+      validate: validator.updateNoteValidation,
+    },
   },
   {
     method: 'DELETE',
