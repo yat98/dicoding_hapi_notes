@@ -2,6 +2,7 @@
 import {nanoid} from 'nanoid';
 import pkg from 'pg';
 import {mapDBToModel} from '../../utils/index.js';
+import NotFoundError from '../../exceptions/NotFoundError.js';
 
 class NotesService {
   constructor() {
@@ -34,7 +35,7 @@ class NotesService {
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new Error('note not found');
+      throw new NotFoundError('note not found');
     }
     return result.rows.map(mapDBToModel)[0];
   }
@@ -47,7 +48,7 @@ class NotesService {
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new Error('note not found');
+      throw new NotFoundError('note not found');
     }
   }
 
@@ -58,7 +59,7 @@ class NotesService {
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new Error('note not found');
+      throw new NotFoundError('note not found');
     }
   }
 }

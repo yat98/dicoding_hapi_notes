@@ -4,8 +4,11 @@
 // import notesModel from '../models/notes.js';
 import Hapi from '@hapi/hapi';
 import notes from './api/notes/index.js';
+import users from './api/users/index.js';
 import NotesService from '../services/postgres/NotesService.js';
+import UsersService from '../services/postgres/UsersService.js';
 import notesValidator from '../validators/notes/index.js';
+import usersValidator from '../validators/users/index.js';
 import app from '../config/app.js';
 
 const server = Hapi.server({
@@ -27,13 +30,24 @@ const server = Hapi.server({
 
 const registerPlugin = async () => {
   const notesService = new NotesService();
-  await server.register({
-    plugin: notes,
-    options: {
-      service: notesService,
-      validator: notesValidator,
+  const usersService = new UsersService();
+
+  await server.register([
+    {
+      plugin: notes,
+      options: {
+        service: notesService,
+        validator: notesValidator,
+      },
     },
-  });
+    {
+      plugin: users,
+      options: {
+        service: usersService,
+        validator: usersValidator,
+      },
+    },
+  ]);
 };
 
 /* c8 ignore next 11 */

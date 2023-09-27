@@ -94,6 +94,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await request.stop();
 });
+
 describe('Notes Feature /notes', () => {
   describe('POST /notes', () => {
     it('should success add note', async () => {

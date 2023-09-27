@@ -1,3 +1,5 @@
+import ClientError from '../../../exceptions/ClientError.js';
+
 class NotesHandler {
   constructor(service) {
     this._service = service;
@@ -42,10 +44,17 @@ class NotesHandler {
         },
       });
     } catch (error) {
+      if (error instanceof ClientError) {
+        return h.response({
+          status: 'fail',
+          message: error.message,
+        }).code(error.statusCode);
+      }
+
       return h.response({
         status: 'fail',
-        message: error.message,
-      }).code(404);
+        message: 'server error',
+      }).code(500);
     }
   }
 
@@ -59,10 +68,17 @@ class NotesHandler {
         message: 'success update note',
       }).code(200);
     } catch (error) {
+      if (error instanceof ClientError) {
+        return h.response({
+          status: 'fail',
+          message: error.message,
+        }).code(error.statusCode);
+      }
+
       return h.response({
         status: 'fail',
-        message: error.message,
-      }).code(404);
+        message: 'server error',
+      }).code(500);
     }
   }
 
@@ -76,10 +92,17 @@ class NotesHandler {
         message: 'success delete note',
       }).code(200);
     } catch (error) {
+      if (error instanceof ClientError) {
+        return h.response({
+          status: 'fail',
+          message: error.message,
+        }).code(error.statusCode);
+      }
+
       return h.response({
         status: 'fail',
-        message: error.message,
-      }).code(404);
+        message: 'server error',
+      }).code(500);
     }
   }
 }
