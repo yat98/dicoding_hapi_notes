@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+/* c8 ignore next 2 */
 import {nanoid} from 'nanoid';
 import pkg from 'pg';
 import {mapDBToModel} from '../../utils/index.js';

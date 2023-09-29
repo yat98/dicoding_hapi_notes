@@ -1,3 +1,3 @@
 import server from './app/server.js';
 
-server.start();
+server.start({start: true});

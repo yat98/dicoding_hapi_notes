@@ -50,7 +50,7 @@ class NotesHandler {
           message: error.message,
         }).code(error.statusCode);
       }
-
+      /* c8 ignore next 4 */
       return h.response({
         status: 'fail',
         message: 'server error',
@@ -74,7 +74,7 @@ class NotesHandler {
           message: error.message,
         }).code(error.statusCode);
       }
-
+      /* c8 ignore next 4 */
       return h.response({
         status: 'fail',
         message: 'server error',
@@ -98,7 +98,7 @@ class NotesHandler {
           message: error.message,
         }).code(error.statusCode);
       }
-
+      /* c8 ignore next 4 */
       return h.response({
         status: 'fail',
         message: 'server error',

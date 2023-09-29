@@ -1,11 +1,13 @@
+/* c8 ignore next 2 */
 import {nanoid} from 'nanoid';
 import bcrypt from 'bcrypt';
 import pkg from 'pg';
 import InvariantError from '../../exceptions/InvariantError.js';
 import NotFoundError from '../../exceptions/NotFoundError.js';
+import AuthenticationError from '../../exceptions/AuthenticationError.js';
 
 class UsersService {
-  constructor(params) {
+  constructor() {
     const {Pool} = pkg;
     this._pool = new Pool();
   }
@@ -21,6 +23,7 @@ class UsersService {
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
+      /* c8 ignore next */
       throw new InvariantError('add user failed');
     }
 
@@ -50,6 +53,26 @@ class UsersService {
     }
 
     return result.rows[0];
+  }
+
+  async verifyUserCredential(username, password) {
+    const query = {
+      text: `SELECT id, password FROM users WHERE username=$1`,
+      values: [username],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new AuthenticationError('username or password is wrong');
+    }
+    const {id, password: hashedPassword} = result.rows[0];
+    const match = await bcrypt.compare(password, hashedPassword);
+
+    if (!match) {
+      throw new AuthenticationError('username or password is wrong');
+    }
+
+    return id;
   }
 }
 

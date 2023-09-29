@@ -22,7 +22,7 @@ const firstUser = async () => {
 };
 
 beforeAll(async () => {
-  request = await server.init();
+  request = await server.start({test: true});
 });
 
 afterAll(async () => {
@@ -50,6 +50,19 @@ describe('Users Feature /notes', () => {
       expect(response.result.message).toBeDefined();
       expect(response.result.status).toBe('success');
       expect(response.result.message).toBe('user created');
+    });
+
+    it('should reject add user when payload invalid', async () => {
+      const response = await request.inject({
+        method: 'POST',
+        url: '/users',
+        payload: {},
+      });
+      expect(response.statusCode).toBe(400);
+      expect(response.result.status).toBeDefined();
+      expect(response.result.message).toBeDefined();
+      expect(response.result.status).toBe('fail');
+      expect(response.result.message).toBe('\"username\" is required. \"password\" is required. \"fullname\" is required');
     });
 
     it('should reject add user', async () => {

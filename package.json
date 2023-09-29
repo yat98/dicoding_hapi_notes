@@ -11,12 +11,14 @@
     "migrate": "node-pg-migrate",
     "test": "jest -i",
     "test:coverage": "jest -i --coverage",
-    "lint": "eslint ./"
+    "lint": "eslint ./",
+    "lint-fix": "eslint ./ --fix"
   },
   "author": "Hidayat Chandra",
   "license": "ISC",
   "devDependencies": {
     "@babel/preset-env": "^7.22.15",
+    "@jest/test-sequencer": "^29.7.0",
     "@types/jest": "^29.5.4",
     "babel-jest": "^29.7.0",
     "c8": "^8.0.1",
@@ -29,6 +31,7 @@
   },
   "dependencies": {
     "@hapi/hapi": "^21.3.2",
+    "@hapi/jwt": "^3.2.0",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.3.1",
     "joi": "^17.10.1",

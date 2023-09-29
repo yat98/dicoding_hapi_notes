@@ -8,6 +8,8 @@ import {mapDBToModel} from '../../src/utils/index.js';
 const {Pool} = pgm;
 const pool = new Pool();
 let request;
+let accessToken = null;
+let refreshToken = null;
 
 const payload = {
   title: 'Test',
@@ -17,6 +19,12 @@ const payload = {
     'ipsum',
   ],
   body: 'Lorem ipsum sit dolor',
+};
+
+const payloadUser = {
+  username: 'testjest_testing',
+  password: 'secretpassword',
+  fullname: 'Test Jest Testing',
 };
 
 const payloadUpdate = {
@@ -29,18 +37,6 @@ const payloadUpdate = {
   body: 'Lorem ipsum sit dolor Updated.',
 };
 
-// const addNote = () => {
-//   const id = nanoid(16);
-//   const createdAt = new Date().toISOString();
-//   const updatedAt = createdAt;
-//   notes.push({
-//     id,
-//     createdAt,
-//     updatedAt,
-//     ...payload,
-//   });
-// };
-
 const addNote = async () => {
   const id = nanoid(16);
   const createdAt = new Date().toISOString();
@@ -52,10 +48,6 @@ const addNote = async () => {
   };
   await pool.query(query);
 };
-
-// const findNoteId = (id) => {
-//   return notes.find((note) => note.id === id);
-// };
 
 const findNoteId = async (id) => {
   const query = {
@@ -74,12 +66,6 @@ const firstNote = async () => {
   return result.rows.map(mapDBToModel)[0];
 };
 
-// const removeNotes = () => {
-//   while (notes.length > 0) {
-//     notes.pop();
-//   }
-// };
-
 const removeNotes = async () => {
   const query = {
     text: 'DELETE FROM notes',
@@ -87,20 +73,82 @@ const removeNotes = async () => {
   await pool.query(query);
 };
 
+const removeUsers = async () => {
+  const query = {
+    text: 'DELETE FROM users',
+  };
+  await pool.query(query);
+};
+
+const removeAuthentications = async () => {
+  const query = {
+    text: 'DELETE FROM authentications',
+  };
+  await pool.query(query);
+};
+
+const login = async () => {
+  let response = await request.inject({
+    method: 'POST',
+    url: '/users',
+    payload: payloadUser,
+  });
+  const {username, password} = payloadUser;
+  response = await request.inject({
+    method: 'POST',
+    url: '/authentications',
+    payload: {
+      username,
+      password,
+    },
+  });
+  accessToken = response.result.data.accessToken;
+  refreshToken = response.result.data.refreshToken;
+};
+
+const getRefreshToken = async () => {
+  const response = await request.inject({
+    method: 'PUT',
+    url: '/authentications',
+    payload: {
+      refreshToken,
+    },
+  });
+  accessToken = response.result.data.accessToken;
+};
+
 beforeAll(async () => {
-  request = await server.init();
+  request = await server.start({test: true});
+  await request.inject({
+    method: 'POST',
+    url: '/users',
+    payload,
+  });
+  await login();
 });
 
 afterAll(async () => {
   await request.stop();
+  await removeUsers();
+  await removeAuthentications();
+  await removeNotes();
 });
 
 describe('Notes Feature /notes', () => {
+  beforeEach(async () => {
+    await getRefreshToken();
+  });
   describe('POST /notes', () => {
+    beforeEach(async () => {
+      await getRefreshToken();
+    });
     it('should success add note', async () => {
       const response = await request.inject({
         method: 'POST',
         url: '/notes',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
         payload,
       });
       const notes = await findNoteId(response.result.data.noteId);
@@ -121,6 +169,9 @@ describe('Notes Feature /notes', () => {
         method: 'POST',
         url: '/notes',
         payload: {},
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.result.status).toBeDefined();
@@ -137,6 +188,9 @@ describe('Notes Feature /notes', () => {
         payload: {
           tags: payload.tags,
           body: payload.body,
+        },
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
@@ -155,6 +209,9 @@ describe('Notes Feature /notes', () => {
           title: payload.title,
           body: payload.body,
         },
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.result.status).toBeDefined();
@@ -172,6 +229,9 @@ describe('Notes Feature /notes', () => {
           title: payload.title,
           tags: payload.tags,
         },
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.result.status).toBeDefined();
@@ -183,12 +243,18 @@ describe('Notes Feature /notes', () => {
   });
 
   describe('GET /notes', () => {
+    beforeEach(async () => {
+      await getRefreshToken();
+    });
     it('should success get list notes', async () => {
       await removeNotes();
       await addNote();
       const response = await request.inject({
         method: 'GET',
         url: '/notes',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.statusCode).toBe(200);
@@ -206,6 +272,9 @@ describe('Notes Feature /notes', () => {
       const response = await request.inject({
         method: 'GET',
         url: '/notes',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.statusCode).toBe(200);
@@ -218,6 +287,9 @@ describe('Notes Feature /notes', () => {
   });
 
   describe('GET /notes/{id}', () => {
+    beforeEach(async () => {
+      await getRefreshToken();
+    });
     it('should success get detail note', async () => {
       await removeNotes();
       await addNote();
@@ -225,6 +297,9 @@ describe('Notes Feature /notes', () => {
       const response = await request.inject({
         method: 'GET',
         url: `/notes/${note.id}`,
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.statusCode).toBe(200);
@@ -242,6 +317,9 @@ describe('Notes Feature /notes', () => {
       const response = await request.inject({
         method: 'GET',
         url: '/notes/invalidid',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.statusCode).toBe(404);
@@ -253,6 +331,9 @@ describe('Notes Feature /notes', () => {
   });
 
   describe('PUT /notes/{id}', () => {
+    beforeEach(async () => {
+      await getRefreshToken();
+    });
     it('should success update note', async () => {
       await removeNotes();
       await addNote();
@@ -261,6 +342,9 @@ describe('Notes Feature /notes', () => {
         method: 'PUT',
         url: `/notes/${note.id}`,
         payload: payloadUpdate,
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
       const notes = await findNoteId(note.id);
       const {title, tags, body} = notes[0];
@@ -281,6 +365,9 @@ describe('Notes Feature /notes', () => {
         method: 'PUT',
         url: `/notes/${note.id}`,
         payload: {},
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.result.status).toBeDefined();
@@ -298,6 +385,9 @@ describe('Notes Feature /notes', () => {
         payload: {
           tags: payloadUpdate.tags,
           body: payloadUpdate.body,
+        },
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
@@ -317,6 +407,9 @@ describe('Notes Feature /notes', () => {
           body: payloadUpdate.body,
           title: payload.title,
         },
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.result.status).toBeDefined();
@@ -334,6 +427,9 @@ describe('Notes Feature /notes', () => {
         payload: {
           tags: payloadUpdate.tags,
           title: payload.title,
+        },
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
@@ -353,6 +449,9 @@ describe('Notes Feature /notes', () => {
           tags: payloadUpdate.tags,
           body: payloadUpdate.body,
         },
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.result.status).toBeDefined();
@@ -364,6 +463,9 @@ describe('Notes Feature /notes', () => {
   });
 
   describe('DELETE /notes/{id}', () => {
+    beforeEach(async () => {
+      await getRefreshToken();
+    });
     it('should success delete note', async () => {
       await removeNotes();
       await addNote();
@@ -371,6 +473,9 @@ describe('Notes Feature /notes', () => {
       const response = await request.inject({
         method: 'DELETE',
         url: `/notes/${note.id}`,
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.statusCode).toBe(200);
@@ -386,6 +491,9 @@ describe('Notes Feature /notes', () => {
       const response = await request.inject({
         method: 'DELETE',
         url: `/notes/invalidid`,
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       expect(response.statusCode).toBe(404);
