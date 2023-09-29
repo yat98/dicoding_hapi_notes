@@ -27,6 +27,12 @@ const payloadUser = {
   fullname: 'Test Jest Testing',
 };
 
+const payloadUserTwo = {
+  username: 'testjest_testing_2',
+  password: 'secretpassword',
+  fullname: 'Test Jest Testing 2',
+};
+
 const payloadUpdate = {
   title: 'Test Update',
   tags: [
@@ -42,9 +48,10 @@ const addNote = async () => {
   const createdAt = new Date().toISOString();
   const updatedAt = createdAt;
   const {title, body, tags} = payload;
+  const user = await findUser(payloadUser.username);
   const query = {
-    text: 'INSERT INTO notes VALUES($1,$2,$3,$4,$5,$6) RETURNING id',
-    values: [id, title, body, tags, createdAt, updatedAt],
+    text: 'INSERT INTO notes VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',
+    values: [id, title, body, tags, createdAt, updatedAt, user.id],
   };
   await pool.query(query);
 };
@@ -64,6 +71,24 @@ const firstNote = async () => {
   };
   const result = await pool.query(query);
   return result.rows.map(mapDBToModel)[0];
+};
+
+const firstNoteByUsername = async (username) => {
+  const query = {
+    text: 'SELECT notes.id, notes.title, notes.body, notes.tags, notes.created_at, notes.updated_at FROM notes JOIN users ON notes.owner = users.id WHERE users.username=$1',
+    values: [username],
+  };
+  const result = await pool.query(query);
+  return result.rows.map(mapDBToModel)[0];
+};
+
+const findUser = async (username) => {
+  const query = {
+    text: 'SELECT * FROM users WHERE username=$1',
+    values: [username],
+  };
+  const result = await pool.query(query);
+  return result.rows[0];
 };
 
 const removeNotes = async () => {
@@ -89,6 +114,11 @@ const removeAuthentications = async () => {
 
 const login = async () => {
   let response = await request.inject({
+    method: 'POST',
+    url: '/users',
+    payload: payloadUserTwo,
+  });
+  response = await request.inject({
     method: 'POST',
     url: '/users',
     payload: payloadUser,
@@ -143,7 +173,24 @@ describe('Notes Feature /notes', () => {
       await getRefreshToken();
     });
     it('should success add note', async () => {
-      const response = await request.inject({
+      const {username, password} = payloadUserTwo;
+      let response = await request.inject({
+        method: 'POST',
+        url: '/authentications',
+        payload: {
+          username,
+          password,
+        },
+      });
+      response = await request.inject({
+        method: 'POST',
+        url: '/notes',
+        headers: {
+          'Authorization': `Bearer ${response.result.data.accessToken}`,
+        },
+        payload,
+      });
+      response = await request.inject({
         method: 'POST',
         url: '/notes',
         headers: {
@@ -312,6 +359,33 @@ describe('Notes Feature /notes', () => {
       expect(response.result.data.note.body).toBe(payload.body);
     });
 
+    it('should return 403 when user not owned note', async () => {
+      const note = await firstNoteByUsername(payloadUser.username);
+      const {username, password} = payloadUserTwo;
+      let response = await request.inject({
+        method: 'POST',
+        url: '/authentications',
+        payload: {
+          username,
+          password,
+        },
+      });
+
+      response = await request.inject({
+        method: 'GET',
+        url: `/notes/${note.id}`,
+        headers: {
+          'Authorization': `Bearer ${response.result.data.accessToken}`,
+        },
+      });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.result.status).toBeDefined();
+      expect(response.result.message).toBeDefined();
+      expect(response.result.status).toBe('fail');
+      expect(response.result.message).toBe('unauthorized');
+    });
+
     it('should return 404 if note is not exists', async () => {
       await removeNotes();
       const response = await request.inject({
@@ -440,6 +514,34 @@ describe('Notes Feature /notes', () => {
       expect(response.result.message).toBe('"body" is required');
     });
 
+    it('should return 403 when user not owned note', async () => {
+      const note = await firstNoteByUsername(payloadUser.username);
+      const {username, password} = payloadUserTwo;
+      let response = await request.inject({
+        method: 'POST',
+        url: '/authentications',
+        payload: {
+          username,
+          password,
+        },
+      });
+
+      response = await request.inject({
+        method: 'PUT',
+        url: `/notes/${note.id}`,
+        headers: {
+          'Authorization': `Bearer ${response.result.data.accessToken}`,
+        },
+        payload,
+      });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.result.status).toBeDefined();
+      expect(response.result.message).toBeDefined();
+      expect(response.result.status).toBe('fail');
+      expect(response.result.message).toBe('unauthorized');
+    });
+
     it('should return 404 when note is not exists', async () => {
       const response = await request.inject({
         method: 'PUT',
@@ -485,6 +587,34 @@ describe('Notes Feature /notes', () => {
       expect(response.result.message).toBe('success delete note');
 
       await removeNotes();
+    });
+
+    it('should return 403 when user not owned note', async () => {
+      await addNote();
+      const note = await firstNoteByUsername(payloadUser.username);
+      const {username, password} = payloadUserTwo;
+      let response = await request.inject({
+        method: 'POST',
+        url: '/authentications',
+        payload: {
+          username,
+          password,
+        },
+      });
+
+      response = await request.inject({
+        method: 'DELETE',
+        url: `/notes/${note.id}`,
+        headers: {
+          'Authorization': `Bearer ${response.result.data.accessToken}`,
+        },
+      });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.result.status).toBeDefined();
+      expect(response.result.message).toBeDefined();
+      expect(response.result.status).toBe('fail');
+      expect(response.result.message).toBe('unauthorized');
     });
 
     it('should return 404 when note is not exists', async () => {
