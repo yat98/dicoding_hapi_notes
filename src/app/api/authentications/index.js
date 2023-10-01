@@ -7,10 +7,10 @@ export default {
   version: '1.0.0',
   // eslint-disable-next-line require-await
   register: async (server, {
-    authenticationService, userService, tokenManager, validator,
+    authenticationsService, usersService, tokenManager, validator,
   }) => {
     const authenticationHandler = new AuthenticationHandler(
-        authenticationService, userService, tokenManager,
+        authenticationsService, usersService, tokenManager,
     );
     server.route(routes(authenticationHandler, validator));
   },

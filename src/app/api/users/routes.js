@@ -12,4 +12,9 @@ export const routes = (handler, validator) => [
     path: '/users/{id}',
     handler: handler.getUserByIdHandler,
   },
+  {
+    method: 'GET',
+    path: '/users',
+    handler: handler.getUserByUsernameHandler,
+  },
 ];

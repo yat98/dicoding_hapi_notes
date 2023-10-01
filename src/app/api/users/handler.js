@@ -6,6 +6,7 @@ class UserHandler {
 
     this.postUserHandler = this.postUserHandler.bind(this);
     this.getUserByIdHandler = this.getUserByIdHandler.bind(this);
+    this.getUserByUsernameHandler = this.getUserByUsernameHandler.bind(this);
   }
 
   async postUserHandler(req, h) {
@@ -46,6 +47,32 @@ class UserHandler {
           user,
         },
       };
+    } catch (error) {
+      if (error instanceof ClientError) {
+        return h.response({
+          status: 'fail',
+          message: error.message,
+        }).code(error.statusCode);
+      }
+      /* c8 ignore next 4 */
+      return h.response({
+        status: 'fail',
+        message: error.message,
+      }).code(500);
+    }
+  }
+
+  async getUserByUsernameHandler(req, h) {
+    try {
+      const {username = ''} = req.query;
+      const users = await this._service.getUsersByUsername(username);
+
+      return h.response({
+        status: 'success',
+        data: {
+          users,
+        },
+      });
     } catch (error) {
       if (error instanceof ClientError) {
         return h.response({

@@ -95,7 +95,7 @@ describe('Users Feature /notes', () => {
       expect(response.result.data.user.fullname).toBeDefined();
     });
 
-    it('should return 404 add user', async () => {
+    it('should return 404 get user', async () => {
       const response = await request.inject({
         method: 'GET',
         url: `/users/xxxx`,
@@ -105,6 +105,34 @@ describe('Users Feature /notes', () => {
       expect(response.result.message).toBeDefined();
       expect(response.result.status).toBe('fail');
       expect(response.result.message).toBe('user not found');
+    });
+  });
+
+  describe('GET /users?username={username}', () => {
+    it('should success get user', async () => {
+      const response = await request.inject({
+        method: 'GET',
+        url: `/users?username=jest`,
+      });
+      expect(response.statusCode).toBe(200);
+      expect(response.result.status).toBeDefined();
+      expect(response.result.data).toBeDefined();
+      expect(response.result.data.users).toBeDefined();
+      expect(response.result.status).toBe('success');
+      expect(response.result.data.users.length).toBe(1);
+    });
+
+    it('should return empty add user', async () => {
+      const response = await request.inject({
+        method: 'GET',
+        url: `/users?username=notfoundanyusername`,
+      });
+      expect(response.statusCode).toBe(200);
+      expect(response.result.status).toBeDefined();
+      expect(response.result.data).toBeDefined();
+      expect(response.result.data.users).toBeDefined();
+      expect(response.result.status).toBe('success');
+      expect(response.result.data.users.length).toBe(0);
     });
   });
 });

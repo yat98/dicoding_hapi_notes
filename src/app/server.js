@@ -8,11 +8,14 @@ import Hapi from '@hapi/hapi';
 import notes from './api/notes/index.js';
 import users from './api/users/index.js';
 import authentications from './api/authentications/index.js';
+import collaborations from './api/collaborations/index.js';
 import NotesService from '../services/postgres/NotesService.js';
 import UsersService from '../services/postgres/UsersService.js';
 import AuthenticationService from '../services/postgres/AuthenticationService.js';
+import CollaborationsService from '../services/postgres/CollaborationsService.js';
 import notesValidator from '../validators/notes/index.js';
 import usersValidator from '../validators/users/index.js';
+import collaborationsValidator from '../validators/collaborations/index.js';
 import authenticationsValidator from '../validators/authentications/index.js';
 import app from '../config/app.js';
 import Jwt from '@hapi/jwt';
@@ -31,13 +34,14 @@ const server = Hapi.server({
   },
 });
 
-/* c8 ignore next 67 */
+/* c8 ignore next 76 */
 // server.route([
 //   ...notesRoute,
 // ]);
 
 const registerPlugin = async () => {
-  const notesService = new NotesService();
+  const collaborationsService = new CollaborationsService();
+  const notesService = new NotesService(collaborationsService);
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationService();
 
@@ -81,10 +85,18 @@ const registerPlugin = async () => {
     {
       plugin: authentications,
       options: {
-        authenticationService: authenticationsService,
-        userService: usersService,
+        authenticationsService,
+        usersService,
         tokenManager: TokenManager,
         validator: authenticationsValidator,
+      },
+    },
+    {
+      plugin: collaborations,
+      options: {
+        collaborationsService,
+        notesService,
+        validator: collaborationsValidator,
       },
     },
   ]);

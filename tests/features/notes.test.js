@@ -357,6 +357,7 @@ describe('Notes Feature /notes', () => {
       expect(response.result.data.note.title).toBe(payload.title);
       expect(response.result.data.note.tags).toEqual(payload.tags);
       expect(response.result.data.note.body).toBe(payload.body);
+      expect(response.result.data.note.username).toBe(payloadUser.username);
     });
 
     it('should return 403 when user not owned note', async () => {
