@@ -30,6 +30,7 @@ import TokenManager from './tokenize/TokenManager.js';
 import path from 'path';
 import * as url from 'url';
 import Inert from '@hapi/inert';
+import CacheService from '../services/redis/CacheService.js';
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 const server = Hapi.server({
@@ -50,8 +51,9 @@ const server = Hapi.server({
 // ]);
 
 const registerPlugin = async () => {
-  const collaborationsService = new CollaborationsService();
-  const notesService = new NotesService(collaborationsService);
+  const cacheService = new CacheService();
+  const collaborationsService = new CollaborationsService(cacheService);
+  const notesService = new NotesService(collaborationsService, cacheService);
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationService();
   const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));

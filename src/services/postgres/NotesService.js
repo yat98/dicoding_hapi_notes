@@ -7,13 +7,15 @@ import NotFoundError from '../../exceptions/NotFoundError.js';
 import AuthorizationError from '../../exceptions/AuthorizationError.js';
 
 class NotesService {
-  constructor(collaborationService) {
+  constructor(collaborationService, cacheService) {
     const {Pool} = pkg;
     this._pool = new Pool();
     this._collaborationService = collaborationService;
+    this._cacheService = cacheService;
   }
 
   async addNote({title, body, tags, owner}) {
+    const key = `notes:${owner}`;
     const id = nanoid(16);
     const createdAt = new Date().toISOString();
     const updatedAt = createdAt;
@@ -22,20 +24,31 @@ class NotesService {
       values: [id, title, body, tags, createdAt, updatedAt, owner],
     };
     const result = await this._pool.query(query);
+    await this._cacheService.delete(key);
 
     return result.rows[0].id;
   }
 
   async getNote(owner) {
-    const query = {
-      text: `SELECT notes.* FROM notes
-      LEFT JOIN collaborations ON collaborations.note_id = notes.id
-      WHERE notes.owner = $1 OR collaborations.user_id = $1
-      GROUP BY notes.id`,
-      values: [owner],
-    };
-    const result = await this._pool.query(query);
-    return result.rows.map(mapDBToModel);
+    const key = `notes:${owner}`;
+    try {
+      const result = await this._cacheService.get(key);
+      return JSON.parse(result);
+    } catch (error) {
+      const query = {
+        text: `SELECT notes.* FROM notes
+        LEFT JOIN collaborations ON collaborations.note_id = notes.id
+        WHERE notes.owner = $1 OR collaborations.user_id = $1
+        GROUP BY notes.id`,
+        values: [owner],
+      };
+      const result = await this._pool.query(query);
+      const mappedResult = result.rows.map(mapDBToModel);
+
+      await this._cacheService.set(key, JSON.stringify(mappedResult));
+
+      return mappedResult;
+    }
   }
 
   async getNoteById(id) {
@@ -56,24 +69,32 @@ class NotesService {
   async editNoteById(id, {title, body, tags}) {
     const updatedAt = new Date().toISOString();
     const query = {
-      text: 'UPDATE notes SET title = $1, body = $2, tags = $3, updated_at = $4 WHERE id = $5 RETURNING id',
+      text: 'UPDATE notes SET title = $1, body = $2, tags = $3, updated_at = $4 WHERE id = $5 RETURNING id, owner',
       values: [title, body, tags, updatedAt, id],
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
       throw new NotFoundError('note not found');
     }
+
+    const {owner} = result.rows[0];
+    const key = `notes:${owner}`;
+    await this._cacheService.delete(key);
   }
 
   async deleteNoteById(id) {
     const query = {
-      text: 'DELETE FROM notes WHERE id = $1 RETURNING id',
+      text: 'DELETE FROM notes WHERE id = $1 RETURNING id, owner',
       values: [id],
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
       throw new NotFoundError('note not found');
     }
+
+    const {owner} = result.rows[0];
+    const key = `notes:${owner}`;
+    await this._cacheService.delete(key);
   }
 
   async verifyNoteOwner(id, owner) {
